@@ -1,0 +1,12 @@
+FROM mcr.microsoft.com/dotnet/core/runtime:3.0-stretch-slim-arm32v7
+
+ARG APPNAME
+ENV ENVAPPNAME ${APPNAME}
+
+# this dockerfile must be built from the folder where the application has been published
+COPY . /app
+
+WORKDIR /app
+
+# start application at boot
+CMD /usr/bin/dotnet ${ENVAPPNAME}
