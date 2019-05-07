@@ -1,0 +1,8 @@
+{
+    "toradexdotnetcore.targetHTTPPort": "5000",
+    "toradexdotnetcore.targetSSHPort": "8022",
+    "toradexdotnetcore.targetDevice": "192.168.1.114",
+    "toradexdotnetcore.SSHkey": "../containers/aspdotnetcoredbg/id_rsa",
+    "toradexdotnetcore.containersTemplatePath": "../containers",
+    "toradexdotnetcore.maindll": "aspdotnetcoreapp.dll",
+    "toradexdotnetcore.prjname": "aspdotnetcoreapp.csproj",

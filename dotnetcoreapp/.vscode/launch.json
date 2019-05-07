@@ -1,0 +1,60 @@
+{
+    // Use IntelliSense to find out which attributes exist for C# debugging
+    // Use hover for the description of the existing attributes
+    // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Core Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "/usr/bin/dotnet",
+            "args": [
+                "/app/${config:toradexdotnetcore.maindll}"
+            ],
+            "cwd": "/app",
+            "stopAtEntry": true,
+            // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
+            "console": "integratedTerminal",
+            "linux": {
+                "preLaunchTask": "waitforsystemready",
+                "pipeTransport": {
+                    "pipeCwd": "${workspaceFolder}",
+                    "pipeProgram": "/usr/bin/ssh",
+                    "pipeArgs": [
+                        "-p",
+                        "${config:toradexdotnetcore.targetSSHPort}",
+                        "-i",
+                        "${config:toradexdotnetcore.SSHkey}",
+                        "-oStrictHostKeyChecking=no",
+                        "root@${config:toradexdotnetcore.targetDevice}"
+                    ],
+                    "debuggerPath": "/root/vsdbg/vsdbg"
+                }
+            },
+            "windows": {
+                "preLaunchTask": "prepareuserkey",
+                "pipeTransport": {
+                    "pipeCwd": "${workspaceFolder}",
+                    "pipeProgram": "ssh",
+                    "pipeArgs": [
+                        "-p",
+                        "${config:toradexdotnetcore.targetSSHPort}",
+                        "-i",
+                        "${config:toradexdotnetcore.SSHkey}",
+                        "-oStrictHostKeyChecking=no",
+                        "root@${config:toradexdotnetcore.targetDevice}"
+                    ],
+                    "debuggerPath": "/root/vsdbg/vsdbg"
+                }
+            },
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        }
+    ]
+}
