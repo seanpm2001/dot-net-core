@@ -18,6 +18,8 @@
             "args": [
                 "publish",
                 "-o",
+                "-r",
+                "linux-arm",
                 "${workspaceFolder}/bin/app",
                 "${workspaceFolder}/${config:toradexdotnetcore.prjname}"
             ],

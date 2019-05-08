@@ -120,6 +120,8 @@ tasks.json :
             "type": "process",
             "args": [
                 "publish",
+                "-r",
+                "linux-arm",                
                 "-o",
                 "${workspaceFolder}/bin/app",
                 "${workspaceFolder}/${config:toradexdotnetcore.prjname}"
