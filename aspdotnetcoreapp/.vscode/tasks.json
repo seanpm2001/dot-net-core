@@ -95,7 +95,7 @@
                         "templatepath": "${workspaceFolder}/${config:toradexdotnetcore.containersTemplatePath}"
                     }
                 },
-                "command": "cd $templatepath/aspdotnetcoredbg ; docker build  -t aspdotnetcoredbg:latest .; cd -",
+                "command": "cd $templatepath/aspdotnetcoredbg ; chmod 0600 id_rsa ; docker build  -t aspdotnetcoredbg:latest .; cd -",
             },
             "windows": {
                 "options": {
