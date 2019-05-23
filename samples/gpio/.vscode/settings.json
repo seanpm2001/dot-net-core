@@ -1,0 +1,8 @@
+{
+    "toradexdotnetcore.targetSSHPort": "8023",
+    "toradexdotnetcore.targetDevice": "10.0.1.47",
+    "toradexdotnetcore.SSHkey": "../../containers/dotnetcoredbg/id_rsa",
+    "toradexdotnetcore.containersTemplatePath": "../../containers",
+    "toradexdotnetcore.maindll": "gpio.dll",
+    "toradexdotnetcore.prjname": "gpio.csproj"
+}
