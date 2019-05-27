@@ -4,5 +4,10 @@
     "toradexdotnetcore.SSHkey": "../../containers/dotnetcoredbg/id_rsa",
     "toradexdotnetcore.containersTemplatePath": "../../containers",
     "toradexdotnetcore.maindll": "gpio.dll",
-    "toradexdotnetcore.prjname": "gpio.csproj"
+    "toradexdotnetcore.prjname": "gpio.csproj",
+    "toradexdotnetcore.containerParms": "",
+    "toradexdotnetcore.containerParms.debug": "",
+    "toradexdotnetcore.containerParms.release": "",
+    "toradexdotnetcore.containerTemplate.debug": "<dbgtemplate>",
+    "toradexdotnetcore.containerTemplate.release": "<releasetemplate>"
 }
