@@ -74,13 +74,14 @@ dotnet new console
 code .
 ```
 
-This will create a new .NET Core application and start Visual Studio Code in that same folder.  
+This will create a new .NET Core application and start Visual Studio Code in that same folder. 
+Copy content of the template folder in this repository to the .vscode subfolder of your project, this will add all the scripts and configuration files required to build, deploy and debug your .NET application on Torizon. 
 
 ### Configure Visual Studio Code
 
 First time you open a .NET/C# project in Visual Studio Code may take a few minutes because the editor will download all required extension, libraries and componets.
 Then you should be able to browse the contents of your folder.  
-You should have a .vscode folder with a couple of json files inside it (tasks.json and lauch.json, we will talk about those later). Create a file named settings.json and add the following configuration parameters:
+Open the file named settings.json in the .vscode folder and change configuration parameters according to your application and device settings:
 
 ```json
 {
@@ -89,14 +90,18 @@ You should have a .vscode folder with a couple of json files inside it (tasks.js
     "toradexdotnetcore.SSHkey": "../containers/dotnetcoredbg/id_rsa",
     "toradexdotnetcore.containersTemplatePath": "../containers",
     "toradexdotnetcore.maindll": "dotnetcoreapp.dll",
-    "toradexdotnetcore.prjname": "dotnetcoreapp.csproj"
+    "toradexdotnetcore.prjname": "dotnetcoreapp.csproj",
+    "toradexdotnetcore.containerParms": "",
+    "toradexdotnetcore.containerParms.debug": "",
+    "toradexdotnetcore.containerParms.release": "",
+    "toradexdotnetcore.containerTemplate.debug": "dotnetcoredbg",
+    "toradexdotnetcore.containerTemplate.release": "dotnetcore"
 }
 ```
 
 of course replace 192.168.1114 with the IP address of your target device and dotnetcoreapp.* with the name of your current project. You will also need to build some containers (process is described in next chapter, if you keep the containers folder from this repo in the parent folder of your dot net core app you can leave the path in containerTemplatePath as it is, otherwise you should point it to the right folder).
 
-You should also add some tasks to tasks.json and some debug configurations to launch.json.  
-If you don't have any custom task/configuration you can just copy the files from our sample (dotnetcoreapp folder).
+You will have also a task configuration file (tasks.json) and a debug configuration file (launch.json). You may need to change those files if you need to deploy or debug your application in a custom way, but the files provided in this repository should work for most of the applications.
 
 tasks.json :
  
@@ -121,7 +126,7 @@ tasks.json :
             "args": [
                 "publish",
                 "-r",
-                "linux-arm",                
+                "linux-arm",
                 "-o",
                 "${workspaceFolder}/bin/app",
                 "${workspaceFolder}/${config:toradexdotnetcore.prjname}"
@@ -150,12 +155,7 @@ tasks.json :
         },
         {
             "label": "restartdebugcontainer",
-            "linux": {
-                "command": "ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker stop ${workspaceFolderBasename}-dbg ; docker run -d --rm --name ${workspaceFolderBasename}-dbg -p ${config:toradexdotnetcore.targetSSHPort}:22 -v $(pwd)/app:/app dotnetcoredbg:latest'",
-            },
-            "windows": {
-                "command": "bash.exe -c \"ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker stop ${workspaceFolderBasename}-dbg ; docker run -d --rm --name ${workspaceFolderBasename}-dbg -p ${config:toradexdotnetcore.targetSSHPort}:22 -v $(pwd)/app:/app dotnetcoredbg:latest'\"",
-            },
+            "command": "ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker stop ${workspaceFolderBasename}-dbg ; docker run -d --rm --name ${workspaceFolderBasename}-dbg -p ${config:toradexdotnetcore.targetSSHPort}:22 -v $(pwd)/app:/app ${config:toradexdotnetcore.containerParms} ${config:toradexdotnetcore.containerParms.debug} ${config:toradexdotnetcore.containerTemplate.debug}:latest'",
             "type": "shell",
             "args": [],
             "problemMatcher": [],
@@ -181,7 +181,7 @@ tasks.json :
         {
             "label": "prepareuserkey",
             "windows": {
-                "command": "bash.exe -c \"cp ${config:toradexdotnetcore.SSHkey} $HOME/${workspaceFolderBasename}-containerkey && chmod 600 $HOME/${workspaceFolderBasename}-containerkey\"",
+                "command": "icacls ${config:toradexdotnetcore.SSHkey} /c /t /grant:r %username%:F /inheritance:r",
             },
             "type": "shell",
             "args": [],
@@ -198,7 +198,7 @@ tasks.json :
                         "templatepath": "${workspaceFolder}/${config:toradexdotnetcore.containersTemplatePath}"
                     }
                 },
-                "command": "cd $templatepath/dotnetcoredbg ; docker build  -t dotnetcoredbg:latest .; cd -",
+                "command": "cd $templatepath/${config:toradexdotnetcore.containerTemplate.debug} ; chmod 0600 id_rsa ; docker build  -t ${config:toradexdotnetcore.containerTemplate.debug}:latest .; cd -",
             },
             "windows": {
                 "options": {
@@ -206,7 +206,7 @@ tasks.json :
                         "templatepath": "${workspaceFolder}\\${config:toradexdotnetcore.containersTemplatePath}"
                     }
                 },
-                "command": "pushd . && cd %templatepath%\\dotnetcoredbg && docker build  -t dotnetcoredbg:latest . && popd",
+                "command": "pushd . && cd %templatepath%\\${config:toradexdotnetcore.containerTemplate.debug} && docker build  -t ${config:toradexdotnetcore.containerTemplate.debug}:latest . && popd",
             },
             "type": "shell",
             "args": [],
@@ -216,10 +216,10 @@ tasks.json :
         {
             "label": "deploydebugcontainer",
             "linux": {
-                "command": "docker save dotnetcoredbg:latest | ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker load'",
+                "command": "docker save ${config:toradexdotnetcore.containerTemplate.debug}:latest | ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker load'",
             },
             "windows": {
-                "command": "docker save dotnetcoredbg:latest | bash.exe -c \"ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker load'\"",
+                "command": "docker save ${config:toradexdotnetcore.containerTemplate.debug}:latest | bash.exe -c \"ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker load'\"",
             },
             "type": "shell",
             "args": [],
@@ -236,7 +236,7 @@ tasks.json :
                         "templatepath": "${workspaceFolder}/${config:toradexdotnetcore.containersTemplatePath}"
                     }
                 },
-                "command": "cd ${workspaceFolder}/bin/app ; docker build -t dotnetcore-${workspaceFolderBasename}:latest --build-arg APPNAME=${config:toradexdotnetcore.maindll} -f $templatepath/dotnetcore/Dockerfile . ; cd -",
+                "command": "cd ${workspaceFolder}/bin/app ; docker build -t ${config:toradexdotnetcore.containerTemplate.release}-${workspaceFolderBasename}:latest --build-arg APPNAME=${config:toradexdotnetcore.maindll} -f $templatepath/${config:toradexdotnetcore.containerTemplate.release}/Dockerfile . ; cd -",
             },
             "windows": {
                 "options": {
@@ -244,7 +244,7 @@ tasks.json :
                         "templatepath": "${workspaceFolder}\\${config:toradexdotnetcore.containersTemplatePath}"
                     }
                 },
-                "command": "pushd . && cd ${workspaceFolder}\\bin\\app && docker build -t dotnetcore-${workspaceFolderBasename}:latest --build-arg APPNAME=${config:toradexdotnetcore.maindll} -f %templatepath%/dotnetcore/Dockerfile . && popd",
+                "command": "pushd . && cd ${workspaceFolder}\\bin\\app && docker build -t ${config:toradexdotnetcore.containerTemplate.release}-${workspaceFolderBasename}:latest --build-arg APPNAME=${config:toradexdotnetcore.maindll} -f %templatepath%\\${config:toradexdotnetcore.containerTemplate.release}\\Dockerfile . && popd",
             },
             "type": "shell",
             "args": [],
@@ -256,10 +256,10 @@ tasks.json :
         {
             "label": "deployreleasecontainer",
             "linux": {
-                "command": "docker save dotnetcore-${workspaceFolderBasename}:latest | ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker load'",
+                "command": "docker save ${config:toradexdotnetcore.containerTemplate.release}-${workspaceFolderBasename}:latest | ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker load'",
             },
             "windows": {
-                "command": "docker save dotnetcore-${workspaceFolderBasename}:latest | bash.exe -c \"ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker load'\"",
+                "command": "docker save ${config:toradexdotnetcore.containerTemplate.release}-${workspaceFolderBasename}:latest | bash.exe -c \"ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker load'\"",
             },
             "type": "shell",
             "args": [],
@@ -270,7 +270,7 @@ tasks.json :
         },
         {
             "label": "runreleasecontainer",
-            "command": "ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker stop ${workspaceFolderBasename} ; docker run -d --rm --name ${workspaceFolderBasename} dotnetcore-${workspaceFolderBasename}:latest'",
+            "command": "ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker stop ${workspaceFolderBasename} ; docker run -d --rm --name ${workspaceFolderBasename} ${config:toradexdotnetcore.containerParms} ${config:toradexdotnetcore.containerParms.release} ${config:toradexdotnetcore.containerTemplate.release}-${workspaceFolderBasename}:latest'",
             "type": "shell",
             "args": [],
             "problemMatcher": [],
@@ -297,19 +297,24 @@ launch.json :
  
 ```json
 {
+    // Use IntelliSense to find out which attributes exist for C# debugging
+    // Use hover for the description of the existing attributes
+    // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
     "version": "0.2.0",
     "configurations": [
         {
             "name": ".NET Core Launch (console)",
             "type": "coreclr",
             "request": "launch",
+            // If you have changed target frameworks, make sure to update the program path.
             "program": "/usr/bin/dotnet",
             "args": [
                 "/app/${config:toradexdotnetcore.maindll}"
             ],
             "cwd": "/app",
             "stopAtEntry": true,
-             "console": "integratedTerminal",
+            // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
+            "console": "integratedTerminal",
             "linux": {
                 "preLaunchTask": "waitforsystemready",
                 "pipeTransport": {
@@ -335,13 +340,13 @@ launch.json :
                         "-p",
                         "${config:toradexdotnetcore.targetSSHPort}",
                         "-i",
-                        "$HOME/${workspaceFolderBasename}-containerkey",
+                        "${config:toradexdotnetcore.SSHkey}",
                         "-oStrictHostKeyChecking=no",
                         "root@${config:toradexdotnetcore.targetDevice}"
                     ],
                     "debuggerPath": "/root/vsdbg/vsdbg"
                 }
-            },
+            }
         }
     ]
 }
@@ -541,10 +546,21 @@ In this document we will describe creation of a basic application with HTTP only
 You should add an additional setting to .vscode\settings.json to set the port that will be used to expose the HTTP server.  
 
 ```json
-    "toradexdotnetcore.targetHTTPPort": "5000"
+{
+    "toradexdotnetcore.targetHTTPPort": "5000",
+    "toradexdotnetcore.targetSSHPort": "8022",
+    "toradexdotnetcore.targetDevice": "192.168.1.114",
+    "toradexdotnetcore.SSHkey": "../containers/aspdotnetcoredbg/id_rsa",
+    "toradexdotnetcore.containersTemplatePath": "../containers",
+    "toradexdotnetcore.maindll": "aspdotnetcoreapp.dll",
+    "toradexdotnetcore.prjname": "aspdotnetcoreapp.csproj",
+    "toradexdotnetcore.containerParms": "-p ${config:toradexdotnetcore.targetHTTPPort}:${config:toradexdotnetcore.targetHTTPPort}",
+    "toradexdotnetcore.containerParms.debug": "",
+    "toradexdotnetcore.containerParms.release": "",
+    "toradexdotnetcore.containerTemplate.debug": "aspdotnetcoredbg",
+    "toradexdotnetcore.containerTemplate.release": "aspdotnetcore"
+}
 ```
-
-Also taks.json and launch.json will have some additional settings, related to the extra ports that need to be enable to let your application communicate to the outside. Please check the files in the aspdotnetcore folder of this repository.
 
 You should then build and deploy the debug container as described in previous chapter (ASP.NET Core uses a different base container) and change the application code to use the native (kestrel) http server on the port you configured.
 
@@ -582,6 +598,7 @@ This is release container for ASP.NET Core applications, it includes the runtime
 This is the ASP.NET version of dotnetcoredbg container, you may need to change it if you plan to expose different or additional ports.
 
 Those containers can be customized by changing their Dockerfile or by creating a new Dockerfile that uses them in their "FROM" statement.  
-Tasks.json and Launch.json reference those containers by the folder name, so you may have to change them if you want to reference a different base container for your application.  
+The container name should match the folder name, and custom names may be configured in settings.json for your specific project.  
 You can add additional exposed port using the EXPOSE clause (this is needed for server ports, not for ports your application accesses as a client) or add additional os components needed by your application.  
 Microsoft-provided containers are based on debian stretch, so you can add components invoking the apt package manager.
+If you just need to specify different parameters at runtime (mapping ports or folders, sharing devices, running container in privileged mode or with a different user account) you can do that using toradexdotnetcode.containerParms or toradexdotnetcode.containerParms.debug/release if those parameters are required only for a specific configuration.
