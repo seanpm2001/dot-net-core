@@ -6,3 +6,9 @@
     "toradexdotnetcore.containersTemplatePath": "../containers",
     "toradexdotnetcore.maindll": "aspdotnetcoreapp.dll",
     "toradexdotnetcore.prjname": "aspdotnetcoreapp.csproj",
+    "toradexdotnetcore.containerParms": "-p ${config:toradexdotnetcore.targetHTTPPort}:${config:toradexdotnetcore.targetHTTPPort}",
+    "toradexdotnetcore.containerParms.debug": "",
+    "toradexdotnetcore.containerParms.release": "",
+    "toradexdotnetcore.containerTemplate.debug": "aspdotnetcoredbg",
+    "toradexdotnetcore.containerTemplate.release": "aspdotnetcore"
+}

@@ -1,13 +1,13 @@
 {
     "toradexdotnetcore.targetSSHPort": "8023",
-    "toradexdotnetcore.targetDevice": "192.168.1.114",
+    "toradexdotnetcore.targetDevice": "<your target device IP>",
     "toradexdotnetcore.SSHkey": "../containers/dotnetcoredbg/id_rsa",
     "toradexdotnetcore.containersTemplatePath": "../containers",
-    "toradexdotnetcore.maindll": "dotnetcoreapp.dll",
-    "toradexdotnetcore.prjname": "dotnetcoreapp.csproj",
+    "toradexdotnetcore.maindll": "<projectname>.dll",
+    "toradexdotnetcore.prjname": "<projectname>.csproj",
     "toradexdotnetcore.containerParms": "",
     "toradexdotnetcore.containerParms.debug": "",
     "toradexdotnetcore.containerParms.release": "",
-    "toradexdotnetcore.containerTemplate.debug": "dotnetcoredbg",
-    "toradexdotnetcore.containerTemplate.release": "dotnetcore"
+    "toradexdotnetcore.containerTemplate.debug": "<dbgtemplate>",
+    "toradexdotnetcore.containerTemplate.release": "<releasetemplate>"
 }
