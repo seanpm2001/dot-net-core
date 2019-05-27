@@ -48,13 +48,7 @@
                     ],
                     "debuggerPath": "/root/vsdbg/vsdbg"
                 }
-            },
-        },
-        {
-            "name": ".NET Core Attach",
-            "type": "coreclr",
-            "request": "attach",
-            "processId": "${command:pickProcess}"
+            }
         }
     ]
 }
