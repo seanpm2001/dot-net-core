@@ -1,0 +1,185 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/${config:toradexdotnetcore.prjname}"
+            ],
+            "problemMatcher": "$tsc"
+        },
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "-r",
+                "linux-arm",
+                "-o",
+                "${workspaceFolder}/bin/app",
+                "${workspaceFolder}/${config:toradexdotnetcore.prjname}"
+            ],
+            "problemMatcher": "$tsc",
+            "dependsOn": [
+                "build"
+            ]
+        },
+        {
+            "label": "deploydebugapp",
+            "linux": {
+                "command": "ssh torizon@${config:toradexdotnetcore.targetDevice}  'mkdir -p /home/torizon/app' && rsync -avz ${workspaceFolder}/bin/app torizon@${config:toradexdotnetcore.targetDevice}:/home/torizon/",
+            },
+            "windows": {
+                "options": {
+                    "cwd": "${workspaceFolder}"
+                },
+                "command": "bash.exe -c \"ssh torizon@${config:toradexdotnetcore.targetDevice}  'mkdir -p /home/torizon/app' && rsync -avz ./bin/app torizon@${config:toradexdotnetcore.targetDevice}:/home/torizon/\"",
+            },
+            "type": "shell",
+            "problemMatcher": [],
+            "dependsOn": [
+                "publish"
+            ]
+        },
+        {
+            "label": "restartdebugcontainer",
+            "command": "ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker stop ${workspaceFolderBasename}-dbg ; docker run -d --rm --name ${workspaceFolderBasename}-dbg -p ${config:toradexdotnetcore.targetSSHPort}:22 -v $(pwd)/app:/app ${config:toradexdotnetcore.containerParms} ${config:toradexdotnetcore.containerParms.debug} ${config:toradexdotnetcore.containerTemplate.debug}:latest'",
+            "type": "shell",
+            "args": [],
+            "problemMatcher": [],
+            "dependsOn": [
+                "deploydebugapp"
+            ]
+        },
+        {
+            "label": "waitforsystemready",
+            "linux": {
+                "command": "while ! nc -z ${config:toradexdotnetcore.targetDevice} ${config:toradexdotnetcore.targetSSHPort}; do sleep 1; done",
+            },
+            "windows": {
+                "command": "bash.exe -c \"while ! nc -z ${config:toradexdotnetcore.targetDevice} ${config:toradexdotnetcore.targetSSHPort}; do sleep 1; done\"",
+            },
+            "type": "shell",
+            "args": [],
+            "problemMatcher": [],
+            "dependsOn": [
+                "restartdebugcontainer"
+            ]
+        },
+        {
+            "label": "prepareuserkey",
+            "windows": {
+                "command": "icacls ${config:toradexdotnetcore.SSHkey} /c /t /grant:r %username%:F /inheritance:r",
+            },
+            "type": "shell",
+            "args": [],
+            "problemMatcher": [],
+            "dependsOn": [
+                "waitforsystemready"
+            ]
+        },
+        {
+            "label": "builddebugcontainer",
+            "linux": {
+                "options": {
+                    "env": {
+                        "templatepath": "${workspaceFolder}/${config:toradexdotnetcore.containersTemplatePath}"
+                    }
+                },
+                "command": "cd $templatepath/${config:toradexdotnetcore.containerTemplate.debug} ; chmod 0600 id_rsa ; docker build  -t ${config:toradexdotnetcore.containerTemplate.debug}:latest .; cd -",
+            },
+            "windows": {
+                "options": {
+                    "env": {
+                        "templatepath": "${workspaceFolder}\\${config:toradexdotnetcore.containersTemplatePath}"
+                    }
+                },
+                "command": "pushd . && cd %templatepath%\\${config:toradexdotnetcore.containerTemplate.debug} && docker build  -t ${config:toradexdotnetcore.containerTemplate.debug}:latest . && popd",
+            },
+            "type": "shell",
+            "args": [],
+            "problemMatcher": [],
+            "dependsOn": []
+        },
+        {
+            "label": "deploydebugcontainer",
+            "linux": {
+                "command": "docker save ${config:toradexdotnetcore.containerTemplate.debug}:latest | ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker load'",
+            },
+            "windows": {
+                "command": "docker save ${config:toradexdotnetcore.containerTemplate.debug}:latest | bash.exe -c \"ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker load'\"",
+            },
+            "type": "shell",
+            "args": [],
+            "problemMatcher": [],
+            "dependsOn": [
+                "builddebugcontainer"
+            ]
+        },
+        {
+            "label": "buildreleasecontainer",
+            "linux": {
+                "options": {
+                    "env": {
+                        "templatepath": "${workspaceFolder}/${config:toradexdotnetcore.containersTemplatePath}"
+                    }
+                },
+                "command": "cd ${workspaceFolder}/bin/app ; docker build -t ${config:toradexdotnetcore.containerTemplate.release}-${workspaceFolderBasename}:latest --build-arg APPNAME=${config:toradexdotnetcore.maindll} -f $templatepath/${config:toradexdotnetcore.containerTemplate.release}/Dockerfile . ; cd -",
+            },
+            "windows": {
+                "options": {
+                    "env": {
+                        "templatepath": "${workspaceFolder}\\${config:toradexdotnetcore.containersTemplatePath}"
+                    }
+                },
+                "command": "pushd . && cd ${workspaceFolder}\\bin\\app && docker build -t ${config:toradexdotnetcore.containerTemplate.release}-${workspaceFolderBasename}:latest --build-arg APPNAME=${config:toradexdotnetcore.maindll} -f %templatepath%\\${config:toradexdotnetcore.containerTemplate.release}\\Dockerfile . && popd",
+            },
+            "type": "shell",
+            "args": [],
+            "problemMatcher": [],
+            "dependsOn": [
+                "publish"
+            ]
+        },
+        {
+            "label": "deployreleasecontainer",
+            "linux": {
+                "command": "docker save ${config:toradexdotnetcore.containerTemplate.release}-${workspaceFolderBasename}:latest | ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker load'",
+            },
+            "windows": {
+                "command": "docker save ${config:toradexdotnetcore.containerTemplate.release}-${workspaceFolderBasename}:latest | bash.exe -c \"ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker load'\"",
+            },
+            "type": "shell",
+            "args": [],
+            "problemMatcher": [],
+            "dependsOn": [
+                "buildreleasecontainer"
+            ]
+        },
+        {
+            "label": "runreleasecontainer",
+            "command": "ssh torizon@${config:toradexdotnetcore.targetDevice} 'docker stop ${workspaceFolderBasename} ; docker run -d --rm --name ${workspaceFolderBasename} ${config:toradexdotnetcore.containerParms} ${config:toradexdotnetcore.containerParms.release} ${config:toradexdotnetcore.containerTemplate.release}-${workspaceFolderBasename}:latest'",
+            "type": "shell",
+            "args": [],
+            "problemMatcher": [],
+            "dependsOn": [
+                "deployreleasecontainer"
+            ]
+        },
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "${workspaceFolder}/dotnetcoreapp.csproj"
+            ],
+            "problemMatcher": "$tsc"
+        }
+    ]
+}
