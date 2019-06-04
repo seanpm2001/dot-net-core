@@ -6,8 +6,8 @@
     "toradexdotnetcore.maindll": "<projectname>.dll",
     "toradexdotnetcore.prjname": "<projectname>.csproj",
     "toradexdotnetcore.containerParms": "",
-    "toradexdotnetcore.containerParms.debug": "",
-    "toradexdotnetcore.containerParms.release": "",
-    "toradexdotnetcore.containerTemplate.debug": "<dbgtemplate>",
-    "toradexdotnetcore.containerTemplate.release": "<releasetemplate>"
+    "toradexdotnetcore.containerParms_debug": "",
+    "toradexdotnetcore.containerParms_release": "",
+    "toradexdotnetcore.containerTemplate_debug": "<dbgtemplate>",
+    "toradexdotnetcore.containerTemplate_release": "<releasetemplate>"
 }

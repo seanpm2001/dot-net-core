@@ -7,8 +7,8 @@
     "toradexdotnetcore.maindll": "aspdotnetcoreapp.dll",
     "toradexdotnetcore.prjname": "aspdotnetcoreapp.csproj",
     "toradexdotnetcore.containerParms": "-p ${config:toradexdotnetcore.targetHTTPPort}:${config:toradexdotnetcore.targetHTTPPort}",
-    "toradexdotnetcore.containerParms.debug": "",
-    "toradexdotnetcore.containerParms.release": "",
-    "toradexdotnetcore.containerTemplate.debug": "aspdotnetcoredbg",
-    "toradexdotnetcore.containerTemplate.release": "aspdotnetcore"
+    "toradexdotnetcore.containerParms_debug": "",
+    "toradexdotnetcore.containerParms_release": "",
+    "toradexdotnetcore.containerTemplate_debug": "aspdotnetcoredbg",
+    "toradexdotnetcore.containerTemplate_release": "aspdotnetcore"
 }
