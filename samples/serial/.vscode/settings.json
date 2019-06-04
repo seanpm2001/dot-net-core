@@ -5,10 +5,9 @@
     "toradexdotnetcore.containersTemplatePath": "../../containers",
     "toradexdotnetcore.maindll": "serial.dll",
     "toradexdotnetcore.prjname": "serial.csproj",
-    "toradexdotnetcore.containerextraparms": "",
     "toradexdotnetcore.containerParms": "",
-    "toradexdotnetcore.containerParms.debug": "",
-    "toradexdotnetcore.containerParms.release": "",
-    "toradexdotnetcore.containerTemplate.debug": "<dbgtemplate>",
-    "toradexdotnetcore.containerTemplate.release": "<releasetemplate>"
+    "toradexdotnetcore.containerParms_debug": "",
+    "toradexdotnetcore.containerParms_release": "",
+    "toradexdotnetcore.containerTemplate_debug": "dotnetcoredbg",
+    "toradexdotnetcore.containerTemplate_release": "dotnetcore"
 }

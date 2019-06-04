@@ -1,13 +1,13 @@
 {
     "toradexdotnetcore.targetSSHPort": "8023",
-    "toradexdotnetcore.targetDevice": "10.0.1.47",
+    "toradexdotnetcore.targetDevice": "192.168.1.128",
     "toradexdotnetcore.SSHkey": "../../containers/dotnetcoredbg/id_rsa",
     "toradexdotnetcore.containersTemplatePath": "../../containers",
     "toradexdotnetcore.maindll": "gpio.dll",
     "toradexdotnetcore.prjname": "gpio.csproj",
-    "toradexdotnetcore.containerParms": "",
-    "toradexdotnetcore.containerParms.debug": "",
-    "toradexdotnetcore.containerParms.release": "",
-    "toradexdotnetcore.containerTemplate.debug": "<dbgtemplate>",
-    "toradexdotnetcore.containerTemplate.release": "<releasetemplate>"
+    "toradexdotnetcore.containerParms": "--privileged",
+    "toradexdotnetcore.containerParms_debug": " ",
+    "toradexdotnetcore.containerParms_release": "",
+    "toradexdotnetcore.containerTemplate_debug": "dotnetcoredbg",
+    "toradexdotnetcore.containerTemplate_release": "dotnetcore"
 }
